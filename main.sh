@@ -4,7 +4,8 @@ echo "=======================   -cPanel server installation and configuration-  
 pwdir=$(pwd)
 cd $pwdir
 
-# yum update -y
+yum update -y
+
 # yum install epel-release -y
 # yum install vim screen -y
 
