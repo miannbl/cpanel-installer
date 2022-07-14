@@ -8,7 +8,7 @@ cd $pwdir
 # yum install epel-release -y
 # yum install vim screen -y
 
-# Setting up Hostname and hosts file
+## Setting up Hostname and hosts file
 server_ip=$( hostname -I | awk '{print $1}' )
 read -e -p "Enter hostname: "  host_name
 hostnamectl set-hostname $host_name
@@ -19,7 +19,7 @@ name_server=$( hostname -d )
 
 
 
-# Basic Server Setup
+############# Basic Server Setup #############
 # ref link: https://docs.cpanel.net/installation-guide/customize-your-installation/?_ga=2.157169467.1496637653.1653812559-33349048.1652956930
 cat > /etc/wwwacct.conf << EOF
 ADDR $server_ip
@@ -40,7 +40,8 @@ touch /root/cpanel_profile/cpanel.config
 echo "mysql-version=10.5" > /root/cpanel_profile/cpanel.config
 
 
-# Creating EasyApache Profile
+
+############# Creating EasyApache Profile ############
 linuxos=$(cat /etc/centos-release | cut -f1 -d" ")
 
 if [ "$linuxos" == "AlmaLinux" ]
@@ -50,13 +51,14 @@ else
 cp ./centos7.json /etc/cpanel_initial_install_ea4_profile.json
 fi
 
-# Installing cPanel
+
+############# Installing cPanel  #############
 cd /home && curl -o latest -L https://securedownloads.cpanel.net/latest && sh latest
 
 cd $pwdir
 
-############ PHP Configuration ############
 
+############ PHP Configuration #############
 configurePHP () {
 	# Example ea-phpXX file location
 	# /opt/cpanel/ea-php72/root/etc/php.ini
@@ -70,10 +72,10 @@ configurePHP () {
 }
 
 
-############ SSH Configuration ############
 
+############ SSH Configuration ############
 configureSSH () {
-    sed -i -e 's/Port 22/Port 22433/g' /etc/ssh/sshd_config
+    sed -i -e 's/#Port 22/Port 22433/g' /etc/ssh/sshd_config
 	sed -i -e 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
 	check=$( grep "UseDNS no" /etc/ssh/sshd_config  )
 	if [ "$check" == "UseDNS no" ]
@@ -93,8 +95,8 @@ configureSSH () {
 }
 
 
-############ Installation and configuration of CSF ############
 
+############ Installation and configuration of CSF ############
 installCSF () {
 	wget https://download.configserver.com/csf.tgz 
 	tar -xzf csf.tgz
@@ -120,7 +122,6 @@ installCSF
 
 systemctl stop rpcbind &&  systemctl disable rpcbind
 
-
 cat > /etc/sysctl.conf << EOF
 kernel.panic = 10
 kernel.watchdog_thresh = 20
@@ -130,8 +131,8 @@ EOF
 
 sysctl -p
 
-
 cat ./disabled_features.txt > /var/cpanel/features/disabled
+
 
 
 # Install linux malware detecter (LMD)
@@ -141,13 +142,13 @@ tar -xzf maldetect-current.tar.gz
 rm -rf maldetect-current.tar.gz
 cd maldetect*
 ./install.sh
-
 cd ../
 cat ./conf.maldet > /usr/local/maldetect/conf.maldet
 
 # Malware monitoring using LMD
 yum install inotify-tools -y
 maldet -u -m users
+
 
 
 # SSH Banner
